@@ -10,6 +10,7 @@ finding with severity, impact and remediation advice.
 | ID | Vulnerability | OWASP API Top 10 | Severity | Automated test |
 |---|---|---|---|---|
 | F-01 | Broken Object Level Authorization on `GET /books/v1/{book_title}` | API1:2023 | High | `tests/test_bola.py` |
+| F-02 | Unauthenticated debug endpoint exposes user credentials | API3:2023 | Critical | `tests/test_data_exposure.py` |
 
 Full details, reproduction steps and recommendations: [reports/FINDINGS.md](reports/FINDINGS.md)
 
@@ -48,11 +49,13 @@ vulnerability is fixed, the same test passes.
 
 ```
 api-security-test-suite/
-├── bola_manual.py      # manual BOLA proof of concept
+├── first_request.py          # first API request (learning script)
+├── bola_manual.py            # manual BOLA proof of concept
 ├── tests/
-│   └── test_bola.py    # automated BOLA test
+│   ├── test_bola.py          # automated BOLA test
+│   └── test_data_exposure.py # automated data exposure tests
 ├── reports/
-│   └── FINDINGS.md     # vulnerability reports
+│   └── FINDINGS.md           # vulnerability reports
 └── requirements.txt
 ```
 
@@ -61,9 +64,9 @@ api-security-test-suite/
 - [x] Development environment setup
 - [x] Target API setup (VAmPI in Docker)
 - [x] BOLA: manual check, automated test, report
-- [ ] Authentication weaknesses
+- [x] Excessive data exposure: automated tests, report
 - [ ] Mass assignment
-- [ ] Excessive data exposure
+- [ ] Authentication weaknesses
 - [ ] GitHub Actions workflow
 
 ## Disclaimer
