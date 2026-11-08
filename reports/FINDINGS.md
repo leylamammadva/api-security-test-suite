@@ -90,6 +90,50 @@ Tests: `tests/test_data_exposure.py`
 - Review all endpoints for unintended data in responses.
 
 
+## F-03: Mass assignment allows self-registration as administrator
+
+| Field | Value |
+|---|---|
+| Severity | Critical |
+| OWASP API Top 10 (2023) | API3: Broken Object Property Level Authorization (mass assignment) |
+| CWE | CWE-915: Improperly Controlled Modification of Dynamically-Determined Object Attributes |
+| Endpoint | `POST /users/v1/register` |
+| Status | Reproduced |
+
+### Description
+
+The registration endpoint accepts and stores the `admin` field if the client
+includes it in the request body. The server does not restrict which
+properties a client may set.
+
+### Impact
+
+Any anonymous user can create an account with administrator privileges.
+This is a privilege escalation: the attacker gains access to administrative
+functionality without any prior access to the system.
+
+### Steps to reproduce
+
+1. Send `POST /users/v1/register` with the usual fields plus
+   `"admin": true`.
+2. Log in as the new user via `POST /users/v1/login`.
+3. Call `GET /me` with the returned token and read the `admin` field.
+
+### Evidence
+
+- Expected: `"admin": false` (the extra field is ignored)
+- Actual: `"admin": true`
+
+Script: `mass_assignment_manual.py`
+Test: `tests/test_mass_assignment.py`
+
+### Recommendation
+
+- Accept only an explicit allow-list of fields on registration
+  (`username`, `password`, `email`).
+- Set sensitive properties such as `admin` on the server side only.
+- Do not bind request bodies directly to database models.
+
 ## F-04: SQL Injection on GET /users/v1/{username}
 
 | Field | Value |
