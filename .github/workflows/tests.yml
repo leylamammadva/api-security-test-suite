@@ -1,0 +1,40 @@
+name: API security tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Start the target API (VAmPI), bound to localhost only
+        run: docker run -d --name vampi -p 127.0.0.1:5000:5000 erev0s/vampi
+
+      - name: Wait until VAmPI answers
+        run: |
+          for i in $(seq 1 30); do
+            if curl -s -o /dev/null http://localhost:5000/; then
+              echo "VAmPI is up"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "VAmPI did not start in time"
+          docker logs vampi
+          exit 1
+
+      - name: Run the tests
+        run: pytest -v
