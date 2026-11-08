@@ -15,6 +15,7 @@ finding with severity, impact and remediation advice.
 | F-02 | Unauthenticated debug endpoint exposes user credentials | API3:2023 | Critical | `tests/test_data_exposure.py` |
 | F-03 | Mass assignment allows self-registration as administrator | API3:2023 | Critical | `tests/test_mass_assignment.py` |
 | F-04 | SQL Injection on `GET /users/v1/{username}` | API8:2023 | Critical | `tests/test_sqli.py` |
+| F-05 | Unauthorized password change leads to account takeover | API1:2023 | Critical | `tests/test_auth.py` |
 
 Full details, reproduction steps and recommendations: [reports/FINDINGS.md](reports/FINDINGS.md)
 Risk prioritization and remediation plan: [reports/RISK_SUMMARY.md](reports/RISK_SUMMARY.md)
@@ -43,8 +44,8 @@ Requirements: Python 3.10+, Docker Desktop, Git.
    pytest -v
    ```
 
-The test suite populates the target's test database automatically and stops
-with a clear message if the API is not reachable.
+The test suite resets the target's test database before every test, and
+stops with a clear message if the API is not reachable.
 
 **Expected result:** all tests report `XFAIL` (expected failure). Each test
 asserts the *secure* behaviour, so a failing assertion proves that the
@@ -66,10 +67,12 @@ api-security-test-suite/
 ├── bola_manual.py                 # manual BOLA proof of concept
 ├── mass_assignment_manual.py      # manual mass assignment proof of concept
 ├── sqli_manual.py                 # manual SQL injection proof of concept
+├── auth_manual.py                 # manual unauthorized password change proof of concept
 ├── pytest.ini                     # pytest settings
 ├── requirements.txt
 ├── tests/
-│   ├── conftest.py                # shared fixtures (login, base URL, API check)
+│   ├── conftest.py                # shared fixtures (login, base URL, API reset)
+│   ├── test_auth.py               # automated password change authorization test
 │   ├── test_bola.py               # automated BOLA test
 │   ├── test_data_exposure.py      # automated data exposure tests
 │   ├── test_mass_assignment.py    # automated mass assignment test
@@ -87,10 +90,9 @@ api-security-test-suite/
 - [x] Excessive data exposure: automated tests, report
 - [x] Mass assignment: manual check, automated test, report
 - [x] SQL injection: manual check, automated test, report
+- [x] Authentication weaknesses: manual check, automated test, report
 - [x] GitHub Actions workflow
 - [x] Risk summary and remediation plan
-- [ ] Authentication weaknesses
-- [ ] Rate limiting checks
 
 ## Disclaimer
 

@@ -182,3 +182,53 @@ Test: `tests/test_sqli.py`
   string.
 - Add input validation on the `username` parameter (e.g. allowed
   character set).
+
+  
+## F-05: Unauthorized password change leads to account takeover
+
+| Field | Value |
+|---|---|
+| Severity | Critical |
+| OWASP API Top 10 (2023) | API1: Broken Object Level Authorization |
+| CWE | CWE-639: Authorization Bypass Through User-Controlled Key; CWE-284: Improper Access Control |
+| Endpoint | `PUT /users/v1/{username}/password` |
+| Status | Reproduced |
+
+### Description
+
+The endpoint changes the password of the user named in the URL path. It
+does not check whether the authenticated user (from the token) is the same
+as the user being modified.
+
+### Impact
+
+Any authenticated user can change any other user's password, including the
+admin's, and then log in as that user. This is a full account takeover:
+the legitimate owner is locked out and the attacker gains complete control
+of the account.
+
+### Steps to reproduce
+
+1. Log in as `name2` via `POST /users/v1/login` and obtain the token.
+2. Call `PUT /users/v1/name1/password` with `{"password": "hacked123"}`,
+   using name2's token.
+3. Log in as `name1` with the new password `hacked123`.
+
+### Evidence
+
+- Expected: `401` or `403` (name2 may only change its own password)
+- Actual: `204 No Content` (password changed), followed by a successful
+  `200 OK` login as `name1` using the attacker-chosen password
+
+Script: `auth_manual.py`
+Test: `tests/test_auth.py`
+
+### Recommendation
+
+- Compare the authenticated user (from the token) with the `{username}` in
+  the URL on every request to this endpoint.
+- Return `403` if they do not match.
+- Require the current password (re-authentication) before allowing a
+  password change, even for the account owner.
+- Add an automated authorization test for every endpoint that modifies
+  user data.
