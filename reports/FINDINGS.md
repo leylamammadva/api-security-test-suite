@@ -88,3 +88,53 @@ Tests: `tests/test_data_exposure.py`
 - Never return password fields in API responses.
 - Store passwords only as salted hashes (e.g. bcrypt or Argon2).
 - Review all endpoints for unintended data in responses.
+
+
+## F-04: SQL Injection on GET /users/v1/{username}
+
+| Field | Value |
+|---|---|
+| Severity | Critical |
+| OWASP API Top 10 (2023) | API8: Security Misconfiguration (Injection) |
+| CWE | CWE-89: Improper Neutralization of Special Elements used in an SQL Command (SQL Injection) |
+| Endpoint | `GET /users/v1/{username}` |
+| Status | Reproduced |
+
+### Description
+
+The `username` path parameter is concatenated directly into the SQL query
+used to look up a user, without sanitization or parameterization. An
+attacker can inject SQL syntax to alter the query's logic.
+
+### Impact
+
+A classic `' OR '1'='1` payload makes the query's WHERE clause always true.
+This allows an attacker to retrieve data for arbitrary users without
+knowing a valid username, and is a common entry point for further database
+compromise (e.g. extracting all user records, including password hashes,
+depending on the underlying query and database permissions).
+
+### Steps to reproduce
+
+1. Log in and obtain a token.
+2. Call `GET /users/v1/doesnotexist123` (a username that does not exist)
+   and confirm a `404` response.
+3. Call `GET /users/v1/doesnotexist123' OR '1'='1` with the same token.
+
+### Evidence
+
+- Expected: `404 Not Found` (no such user)
+- Actual: `200 OK` with another user's data:
+  `{"username": "name1", "email": "mail1@mail.com"}`
+
+Script: `sqli_manual.py`
+Test: `tests/test_sqli.py`
+
+### Recommendation
+
+- Use parameterized queries or an ORM with proper escaping (e.g.
+  SQLAlchemy's query builder) instead of string concatenation.
+- Never build SQL queries by inserting raw user input into the query
+  string.
+- Add input validation on the `username` parameter (e.g. allowed
+  character set).

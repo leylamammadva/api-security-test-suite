@@ -14,8 +14,10 @@ finding with severity, impact and remediation advice.
 | F-01 | Broken Object Level Authorization on `GET /books/v1/{book_title}` | API1:2023 | High | `tests/test_bola.py` |
 | F-02 | Unauthenticated debug endpoint exposes user credentials | API3:2023 | Critical | `tests/test_data_exposure.py` |
 | F-03 | Mass assignment allows self-registration as administrator | API3:2023 | Critical | `tests/test_mass_assignment.py` |
+| F-04 | SQL Injection on `GET /users/v1/{username}` | API8:2023 | Critical | `tests/test_sqli.py` |
 
 Full details, reproduction steps and recommendations: [reports/FINDINGS.md](reports/FINDINGS.md)
+Risk prioritization and remediation plan: [reports/RISK_SUMMARY.md](reports/RISK_SUMMARY.md)
 
 ## How to run
 
@@ -63,15 +65,18 @@ api-security-test-suite/
 ├── first_request.py               # first API request (learning script)
 ├── bola_manual.py                 # manual BOLA proof of concept
 ├── mass_assignment_manual.py      # manual mass assignment proof of concept
+├── sqli_manual.py                 # manual SQL injection proof of concept
 ├── pytest.ini                     # pytest settings
 ├── requirements.txt
 ├── tests/
 │   ├── conftest.py                # shared fixtures (login, base URL, API check)
 │   ├── test_bola.py               # automated BOLA test
 │   ├── test_data_exposure.py      # automated data exposure tests
-│   └── test_mass_assignment.py    # automated mass assignment test
+│   ├── test_mass_assignment.py    # automated mass assignment test
+│   └── test_sqli.py               # automated SQL injection test
 └── reports/
-    └── FINDINGS.md                # vulnerability reports
+    ├── FINDINGS.md                # vulnerability reports
+    └── RISK_SUMMARY.md            # risk matrix, remediation plan, control mapping
 ```
 
 ## Roadmap
@@ -81,10 +86,11 @@ api-security-test-suite/
 - [x] BOLA: manual check, automated test, report
 - [x] Excessive data exposure: automated tests, report
 - [x] Mass assignment: manual check, automated test, report
+- [x] SQL injection: manual check, automated test, report
 - [x] GitHub Actions workflow
+- [x] Risk summary and remediation plan
 - [ ] Authentication weaknesses
 - [ ] Rate limiting checks
-- [ ] Risk summary and remediation plan
 
 ## Disclaimer
 
