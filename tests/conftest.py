@@ -6,11 +6,12 @@ import requests
 BASE_URL = "http://localhost:5000"
 
 
-@pytest.fixture(scope="session", autouse=True)
+@pytest.fixture(scope="function", autouse=True)
 def target_api_ready():
     """Stop early with a clear message if VAmPI is not running.
 
-    Also (re)populates the test database, so no manual /createdb step is needed.
+    Also (re)populates the test database before every test, so tests that
+    modify data (e.g. changing a password) cannot affect later tests.
     """
     try:
         requests.get(f"{BASE_URL}/createdb", timeout=5)
