@@ -81,7 +81,7 @@ api-security-test-suite/
 - [x] BOLA: manual check, automated test, report
 - [x] Excessive data exposure: automated tests, report
 - [x] Mass assignment: manual check, automated test, report
-- [ ] GitHub Actions workflow
+- [x] GitHub Actions workflow
 - [ ] Authentication weaknesses
 - [ ] Rate limiting checks
 - [ ] Risk summary and remediation plan
